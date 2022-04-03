@@ -38,17 +38,22 @@ func main() {
 	filename := string(tag[:i])
 
 	// get current dot position
-	_, _, err = w.ReadAddr()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = w.Ctl("addr=dot")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	q0, q1, err := w.ReadAddr()
-	if err != nil {
-		log.Fatalln(err)
+	q0, q1 := 0, 0
+	if pos0, err := strconv.Atoi(os.Getenv("acme_pos0")); err == nil {
+		q0, q1 = pos0, pos0
+	} else {
+		_, _, err = w.ReadAddr()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		err = w.Ctl("addr=dot")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		q0, q1, err = w.ReadAddr()
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	fmt.Printf("%s:#%d,#%d\n", filename, q0, q1)
