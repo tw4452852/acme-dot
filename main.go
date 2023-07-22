@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,12 +12,15 @@ import (
 	"9fans.net/go/acme"
 )
 
+var lineF = flag.Bool("l", false, "show in 'line col' format")
+
 func main() {
-	if len(os.Args) != 2 {
-		log.Fatalf("%s winid\n", os.Args[0])
+	flag.Parse()
+	if len(flag.Args()) != 1 {
+		log.Fatalf("%s [-l] winid\n", os.Args[0])
 	}
 
-	winid, err := strconv.Atoi(os.Args[1])
+	winid, err := strconv.Atoi(flag.Arg(0))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -31,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	i := bytes.IndexRune(tag, ' ')
 	if i < 0 {
 		i = len(tag)
@@ -56,5 +62,35 @@ func main() {
 		}
 	}
 
-	fmt.Printf("%s:#%d,#%d\n", filename, q0, q1)
+	if *lineF {
+		f, err := os.Open(filename)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer f.Close()
+
+		scanner := bufio.NewScanner(f)
+		scanner.Split(bufio.ScanBytes)
+
+		n := 0
+		l := 0
+		c := 0
+		for scanner.Scan() {
+			n++
+			c++
+			if n == q0 {
+				break
+			}
+			if scanner.Bytes()[0] == '\n' {
+				l++
+				c = 0
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("%d %d\n", l, c)
+	} else {
+		fmt.Printf("%s:#%d,#%d\n", filename, q0, q1)
+	}
 }
