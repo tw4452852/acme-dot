@@ -70,7 +70,7 @@ func main() {
 		defer f.Close()
 
 		scanner := bufio.NewScanner(f)
-		scanner.Split(bufio.ScanBytes)
+		scanner.Split(bufio.ScanRunes)
 
 		n := 0
 		l := 0
@@ -78,12 +78,12 @@ func main() {
 		for scanner.Scan() {
 			n++
 			c++
-			if n == q0 {
-				break
-			}
-			if scanner.Bytes()[0] == '\n' {
+			if scanner.Text() == "\n" {
 				l++
 				c = 0
+			}
+			if n == q0 {
+				break
 			}
 		}
 		if err := scanner.Err(); err != nil {
@@ -94,3 +94,4 @@ func main() {
 		fmt.Printf("%s:#%d,#%d\n", filename, q0, q1)
 	}
 }
+
